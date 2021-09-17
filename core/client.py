@@ -6,6 +6,17 @@ from urllib.parse import urlencode
 class Finage(object):
     api_root = "https://api.finage.co.uk"
 
+    def symbol_request(endpoint):
+        def decorator(func):
+            def wrapper_request(*args, **kwargs):
+                self = args[0]
+                symbol = args[1]
+                new_endpoint = endpoint.format(symbol=symbol)
+                url = self._make_query_string(new_endpoint, data=kwargs)
+                return self._make_request(url)
+            return wrapper_request
+        return decorator
+
     def __init__(self, api_key=None):
         env_key = os.environ.get("FINAGE_KEY")
         if api_key is not None:
@@ -15,7 +26,7 @@ class Finage(object):
         else:
             raise ValueError("Needs an API key")
 
-    def _make_query_string(self, endpoint, data):
+    def _make_query_string(self, endpoint, data={}):
         data_list = list(data.items())
         data_list.insert(0, ("apikey", self.api_key))
         encoded = urlencode(data_list)
@@ -33,10 +44,9 @@ class Finage(object):
             print(f"Failed GET {query}")
         return response
 
+    @symbol_request("/last/stock/{symbol}")
     def get_stock_last(self, symbol, ts="ms"):
-        endpoint = f"/last/stock/{symbol}"
-        url = self._make_query_string(endpoint, {"ts": ts})
-        return self._make_request(url)
+        pass
 
     def get_stocks_last(self, symbols, ts="ms"):
         endpoint = "/last/stocks"
@@ -47,10 +57,9 @@ class Finage(object):
             print(f"GET {url}")
         return response
 
+    @symbol_request("/last/trade/stock/{symbol}")
     def get_stock_last_trade(self, symbol, ts="ms"):
-        endpoint = f"/last/trade/stock/{symbol}"
-        url = self._make_query_string(endpoint, {"ts": ts})
-        return self._make_request(url)
+        pass
 
     def get_stocks_last_trade(self, symbols, ts="ms"):
         stocks = ",".join(symbols)
@@ -93,7 +102,10 @@ class Finage(object):
         url = self._make_query_string(endpoint, {})
         return self._make_request(url)
 
-    def get_stock_previous_close(self, symbol, unadj=True):
-        endpoint = f"/agg/stock/prev-close/{symbol}"
-        url = self._make_query_string(endpoint, {"unadjusted": str(unadj)})
-        return self._make_request(url)
+    @symbol_request("/agg/stock/prev-close/{symbol}")
+    def get_stock_previous_close(self, symbol, unadjusted=True):
+        pass
+
+    @symbol_request("/last/forex/{symbol}")
+    def get_forex_last(self, symbol):
+        pass

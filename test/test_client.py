@@ -9,6 +9,7 @@ root = "https://api.finage.co.uk"
 symbols = "AAPL,TSLA,GOGL"
 good_resp = [
     (f"{root}/last/stock/ALK?apikey=FAKE_KEY&ts=ms", {}),
+    (f"{root}/last/stock/ALK?apikey=FAKE_KEY", {}),
     (f"{root}/last/stocks?apikey=FAKE_KEY&ts=ms&symbols={symbols}", {}),
     (f"{root}/last/trade/stock/ALK", {}),
     (
@@ -19,6 +20,7 @@ good_resp = [
     (f"{root}/history/stock/all", {}),
     (f"{root}/agg/stock/ALK/1/day/2021-06-01/2021-09-01", {}),
     (f"{root}/agg/stock/prev-close/ALK?apikey=FAKE_KEY&unadjusted=True", {}),
+    (f"{root}/agg/stock/prev-close/ALK?apikey=FAKE_KEY", {}),
 ]
 
 
@@ -35,7 +37,8 @@ class TestClient(object):
             responses.add(responses.GET, resp[0], json=resp[1], status=200)
 
     def test_init(self):
-        del os.environ["FINAGE_KEY"]
+        if "FINAGE_KEY" in os.environ.keys():
+            del os.environ["FINAGE_KEY"]
         with pytest.raises(ValueError, match="Needs an API key"):
             Finage()
         os.environ["FINAGE_KEY"] = self.fake
@@ -49,6 +52,7 @@ class TestClient(object):
         assert qs == "https://api.finage.co.uk/hello?apikey=FAKE_KEY&foo=bar"
         qs = self.client._make_query_string("/hello", {})
         assert qs == "https://api.finage.co.uk/hello?apikey=FAKE_KEY"
+        qs = self.client._make_query_string("/hello")
 
     @responses.activate
     def test_get_stocks(self):
