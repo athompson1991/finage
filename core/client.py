@@ -2,6 +2,7 @@ import os
 import requests
 from urllib.parse import urlencode
 import logging
+import re
 
 
 logging.basicConfig(
@@ -27,7 +28,7 @@ class Finage(object):
         else:
             raise ValueError("Needs an API key")
 
-    def get_request(endpoint, is_symbol=True):
+    def get_request(endpoint):
         def decorator(func):
             def wrapper_request(*args, **kwargs):
                 data = {}
@@ -43,15 +44,19 @@ class Finage(object):
                         data[arg_names[i]] = args[i]
                 for k in kwargs.keys():
                     data[k] = kwargs[k]
-                if is_symbol:
-                    del data["symbol"]
-                    symbol = args[1]
+                if "symbols" in data.keys():
+                    data["symbols"] = ",".join(data["symbols"])
+                fargs = re.findall("\\{[a-z_]+\\}", endpoint)
+                names = [a.replace("{", "").replace("}", "") for a in fargs]
+                if len(names) > 0:
+                    kwargs = {n: data[n] for n in names}
+                    for n in names:
+                        del data[n]
                     url = self._make_query_string(
-                        endpoint.format(symbol=symbol), data=data)
+                        endpoint.format(**kwargs), data=data)
                 else:
                     url = self._make_query_string(endpoint, data=data)
                 response = self._make_request(url)
-                self.logger.info(f"{response.status_code} GET {url}")
                 return response
             return wrapper_request
         return decorator
@@ -63,46 +68,39 @@ class Finage(object):
         query_string = f"{self.api_root}{endpoint}?{encoded}"
         return query_string
 
-    def _make_request(self, query, headers=None):
+    def _make_request(self, url, headers=None):
         self.session = requests.session()
         if headers is not None:
             self.session.headers.update(headers)
-        response = self.session.get(query, timeout=1)
+        response = self.session.get(url, timeout=1)
+        self.logger.info(f"{response.status_code} GET {url}")
         return response
 
     @get_request("/last/stock/{symbol}")
     def get_stock_last(self, symbol, ts="ms"):
         pass
 
+    @get_request("/last/stocks")
     def get_stocks_last(self, symbols, ts="ms"):
-        endpoint = "/last/stocks"
-        symbols = ",".join(symbols)
-        url = self._make_query_string(endpoint, {"ts": ts, "symbols": symbols})
-        response = requests.get(url)
-        if response.ok:
-            print(f"GET {url}")
-        return response
+        pass
 
     @get_request("/last/trade/stock/{symbol}")
     def get_stock_last_trade(self, symbol, ts="ms"):
         pass
 
+    @get_request("/last/trade/stocks")
     def get_stocks_last_trade(self, symbols, ts="ms"):
-        stocks = ",".join(symbols)
-        endpoint = "/last/trade/stocks"
-        url = self._make_query_string(endpoint, {"ts": ts, "symbols": stocks})
-        return self._make_request(url)
+        pass
 
     @get_request("/history/stock/open-close")
-    def get_stock_end_of_day(self, symbol, date="2021-06-01"):
+    def get_stock_end_of_day(self, stock, date="2021-06-01"):
         pass
 
-    @get_request("/history/stock/all", False)
-    def get_stock_historical_book(
-        self, stock, date="2021-06-01", limit=20
-    ):
+    @get_request("/history/stock/all")
+    def get_stock_hist_book(self, stock, date="2021-06-01", limit=20):
         pass
 
+    @get_request("/agg/stock/{symbol}/{multiply}/{time}/{from_dt}/{to_dt}")
     def get_stock_aggregates(
         self,
         symbol,
@@ -111,9 +109,7 @@ class Finage(object):
         from_dt="2021-06-01",
         to_dt="2021-09-01",
     ):
-        endpoint = f"/agg/stock/{symbol}/{multiply}/{time}/{from_dt}/{to_dt}"
-        url = self._make_query_string(endpoint, {})
-        return self._make_request(url)
+        pass
 
     @get_request("/agg/stock/prev-close/{symbol}")
     def get_stock_previous_close(self, symbol, unadjusted=True):
@@ -125,4 +121,123 @@ class Finage(object):
 
     @get_request("/last/trade/forex/{symbol}")
     def get_forex_last_trade(self, symbol):
+        pass
+
+    @get_request("/history/ticks/forex/{symbol}/{date}")
+    def get_forex_hist_tick(self, symbol, date="2021-06-01", limit=10):
+        pass
+
+    @get_request("/agg/forex/prev-close/{symbol}")
+    def get_forex_previous_close(self, symbol, unadjusted=True):
+        pass
+
+    @get_request("/agg/forex/{symbol}/{multiply}/{time}/{from_dt}/{to_dt}")
+    def get_forex_aggregates(
+        self,
+        symbol,
+        multiply=1,
+        time="day",
+        from_dt="2021-06-01",
+        to_dt="2021-09-01",
+    ):
+        pass
+
+    @get_request("/convert/forex/{from_}/{to}/{amount}")
+    def get_forex_convert(self, from_, to="USD", amount=1):
+        pass
+
+    @get_request("symbol-list/{market_type}")
+    def get_symbol_list(self, market_type, page=1):
+        pass
+
+    @get_request("/economic-calendar")
+    def get_economic_calendar(self, from_="2021-06-01", to="2021-07-01"):
+        pass
+
+    @get_request("/cash-flow-statement/{symbol}")
+    def get_cash_flow_statements(self, symbol, limit=10, period="annual"):
+        pass
+
+    @get_request("/balance-sheet-statements/{symbol}")
+    def get_balance_sheet(self, symbol, limit=10, period="annual"):
+        pass
+
+    @get_request("/income-statement/{symbol}")
+    def get_income_statements(self, symbol, limit=10, period="annual"):
+        pass
+
+    @get_request("/detail/{symbol}")
+    def get_details(self, symbol):
+        pass
+
+    @get_request("/funds/institutional-holder/{symbol}")
+    def get_institutional_holders(self, symbol):
+        pass
+
+    @get_request("/funds/mutual-fund-holder/{symbol}")
+    def get_mutual_fund_holders(self, symbol):
+        pass
+
+    @get_request("/funds/etf-holder/{symbol}")
+    def get_etf_holders(self, symbol):
+        pass
+
+    @get_request("/funds/etf-sector-weightings/{symbol}")
+    def get_etf_sector_weightings(self, symbol):
+        pass
+
+    @get_request("/funds/rss-feed")
+    def get_sec_rss(self, symbol):
+        pass
+
+    @get_request("/technical-indicator/{indicator}/{time}/{symbol}")
+    def get_indicator(self, symbol, indicator, time="daily", period=10):
+        pass
+
+    @get_request("/market-information/us/most-actives")
+    def get_most_active(self):
+        pass
+
+    @get_request("/market-information/us/most-gainers")
+    def get_most_gainers(self):
+        pass
+
+    @get_request("/market-information/us/most-losers")
+    def get_most_losers(self):
+        pass
+
+    @get_request("/market-information/us/sector-performance")
+    def get_sector_performance(self):
+        pass
+
+    @get_request("market-information/us/historical-sector-performance")
+    def get_sector_performance_hist(self, limit=10):
+        pass
+
+    @get_request("search/market/{market}/{key}")
+    def get_market_search(self, market, key, limit=10):
+        pass
+
+    @get_request("search/country/{key}")
+    def get_country_search(self, key, limit=10):
+        pass
+
+    @get_request("detail/country/{country}")
+    def get_country_details(self, country):
+        pass
+
+    @get_request("search/currency/{key}")
+    def get_forex_search(self, key, limit=10):
+        pass
+
+    @get_request("detail/currency/{symbol}")
+    def get_forex_details(self, symbol):
+        pass
+
+    @get_request("search/cryptocurrency/{key}")
+    def get_crypto_search(self, key, limit=10):
+        pass
+
+    @get_request("detail/cryptocurrency/{key}")
+    def get_crypto_details(self, key):
         pass
