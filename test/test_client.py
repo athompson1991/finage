@@ -35,6 +35,11 @@ class TestClient(object):
         self.client = Finage(self.fake)
         for resp in good_resp:
             responses.add(responses.GET, resp[0], json=resp[1], status=200)
+        responses.add(
+            responses.GET,
+            f"{root}/history/stock/all?apikey=FAKE_KEY",
+            json={}, status=400
+        )
 
     def test_init(self):
         if "FINAGE_KEY" in os.environ.keys():
