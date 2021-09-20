@@ -210,34 +210,34 @@ class Finage(object):
     def get_sector_performance(self):
         pass
 
-    @get_request("market-information/us/historical-sector-performance")
+    @get_request("/market-information/us/historical-sector-performance")
     def get_sector_performance_hist(self, limit=10):
         pass
 
-    @get_request("search/market/{market}/{key}")
+    @get_request("/search/market/{market}/{key}")
     def get_market_search(self, market, key, limit=10):
         pass
 
-    @get_request("search/country/{key}")
+    @get_request("/search/country/{key}")
     def get_country_search(self, key, limit=10):
         pass
 
-    @get_request("detail/country/{country}")
+    @get_request("/detail/country/{country}")
     def get_country_details(self, country):
         pass
 
-    @get_request("search/currency/{key}")
+    @get_request("/search/currency/{key}")
     def get_forex_search(self, key, limit=10):
         pass
 
-    @get_request("detail/currency/{symbol}")
+    @get_request("/detail/currency/{symbol}")
     def get_forex_details(self, symbol):
         pass
 
-    @get_request("search/cryptocurrency/{key}")
+    @get_request("/search/cryptocurrency/{key}")
     def get_crypto_search(self, key, limit=10):
         pass
 
-    @get_request("detail/cryptocurrency/{key}")
+    @get_request("/detail/cryptocurrency/{key}")
     def get_crypto_details(self, key):
         pass
