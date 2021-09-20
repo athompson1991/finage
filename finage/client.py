@@ -187,7 +187,7 @@ class Finage(object):
         pass
 
     @get_request("/funds/rss-feed")
-    def get_sec_rss(self, symbol):
+    def get_sec_rss(self):
         pass
 
     @get_request("/technical-indicator/{indicator}/{time}/{symbol}")
