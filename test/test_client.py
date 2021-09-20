@@ -1,6 +1,6 @@
 import responses
 import os
-from core.client import Finage
+from finage.client import Finage
 import logging
 import pytest
 

@@ -4,7 +4,12 @@ The unofficial Python library for accessing the [Finage](https://finage.co.uk/do
 REST API. Though a work in progress, this package can already fetch data on stocks, forex, and fundamentals.
 
 ## Installation
-Still working on getting this loaded onto PyPI. You can just clone this repo for the time being.
+
+The package can be installed directly from PyPI with `pip`:
+
+```
+pip install finage
+```
 
 ## Usage
 
@@ -14,11 +19,11 @@ save it as and environment variable (`export FINAGE_KEY=<api_key>`), or you can 
 client class `Finage` as is done in the below example:
 
 ```python
-from core.client import Finage
+from finage import Finage
 
 api_key = "FAKE_KEY"
-finage = Finage(api_key)
-resp = finage.get_stock_last("AMZN")
+client = Finage(api_key)
+resp = client.get_stock_last("AMZN")
 resp.json()
 ```
 
