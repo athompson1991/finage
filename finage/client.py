@@ -146,7 +146,7 @@ class Finage(object):
     def get_forex_convert(self, from_, to="USD", amount=1):
         pass
 
-    @get_request("symbol-list/{market_type}")
+    @get_request("/symbol-list/{market_type}")
     def get_symbol_list(self, market_type, page=1):
         pass
 
@@ -240,4 +240,12 @@ class Finage(object):
 
     @get_request("/detail/cryptocurrency/{key}")
     def get_crypto_details(self, key):
+        pass
+
+    @get_request("/last/crypto/detailed/{symbol}")
+    def get_crypto_last_detail(self, symbol):
+        pass
+
+    @get_request("/search/index/{key}")
+    def get_index_search(self, key, limit=10):
         pass
