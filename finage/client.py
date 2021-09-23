@@ -8,9 +8,7 @@ import re
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.StreamHandler()
-    ]
+    handlers=[logging.StreamHandler()],
 )
 
 
@@ -31,6 +29,7 @@ class Finage(object):
     def get_request(endpoint):
         if endpoint[0] != "/":
             raise ValueError("Invalid endpoint, must start with slash")
+
         def decorator(func):
             def wrapper_request(*args, **kwargs):
                 data = {}
@@ -55,12 +54,15 @@ class Finage(object):
                     for n in names:
                         del data[n]
                     url = self._make_query_string(
-                        endpoint.format(**kwargs), data=data)
+                        endpoint.format(**kwargs), data=data
+                    )
                 else:
                     url = self._make_query_string(endpoint, data=data)
                 response = self._make_request(url)
                 return response
+
             return wrapper_request
+
         return decorator
 
     def _make_query_string(self, endpoint, data={}):
@@ -78,7 +80,7 @@ class Finage(object):
         self.logger.info(f"{response.status_code} GET {url}")
         return response
 
-    ## US STOCKS
+    # US STOCKS
 
     @get_request("/last/stock/{symbol}")
     def get_stock_last(self, symbol, ts="ms"):
@@ -119,7 +121,7 @@ class Finage(object):
     def get_stock_previous_close(self, symbol, unadjusted=True):
         pass
 
-    ## FOREX
+    # FOREX
 
     @get_request("/last/forex/{symbol}")
     def get_forex_last(self, symbol):
@@ -152,7 +154,54 @@ class Finage(object):
     def get_forex_convert(self, from_, to="USD", amount=1):
         pass
 
-    ## FUNDAMENTALS
+    # CRYPTO
+
+    @get_request("/last/crypto/{symbol}")
+    def get_crypto_last(self, symbol):
+        pass
+
+    @get_request("/last/quote/crypto/{symbol}")
+    def get_crypto_last_details(self, symbol):
+        pass
+
+    @get_request("/agg/crypto/{symbol}/{multiply}/{time}/{from_dt}/{to_dt}")
+    def get_crypto_aggregates(
+        self,
+        symbol,
+        multiply=1,
+        time="day",
+        from_dt="2021-06-01",
+        to_dt="2021-09-01",
+        limit=500,
+        sort="asc"
+    ):
+        pass
+
+    @get_request("/agg/crypto/prev-close/{symbol}")
+    def get_crypto_previous_close(self, symbol):
+        pass
+
+    @get_request("/depth/crypto/{symbol}")
+    def get_crypto_depth(self, symbol):
+        pass
+
+    @get_request("/history/crypto/depth/{symbol}/{from_}/{to}")
+    def get_crypto_depth_hist(
+        self, symbol, from_="2021-06-01", to="2021-09-01", limit=500
+    ):
+        pass
+
+    @get_request("/last/crypto/changes/{symbol}")
+    def get_crypto_price_change(self, symbol):
+        pass
+
+    @get_request("/history/market-cap/crypto/{symbol}/{from_}/{to}")
+    def get_crypto_market_cap_hist(
+        self, symbol, from_="2021-06-01", to="2021-09-01"
+    ):
+        pass
+
+    # FUNDAMENTALS
 
     @get_request("/symbol-list/{market_type}")
     def get_symbol_list(self, market_type, page=1):
