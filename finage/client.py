@@ -29,6 +29,8 @@ class Finage(object):
             raise ValueError("Needs an API key")
 
     def get_request(endpoint):
+        if endpoint[0] != "/":
+            raise ValueError("Invalid endpoint, must start with slash")
         def decorator(func):
             def wrapper_request(*args, **kwargs):
                 data = {}
@@ -76,6 +78,8 @@ class Finage(object):
         self.logger.info(f"{response.status_code} GET {url}")
         return response
 
+    ## US STOCKS
+
     @get_request("/last/stock/{symbol}")
     def get_stock_last(self, symbol, ts="ms"):
         pass
@@ -115,6 +119,8 @@ class Finage(object):
     def get_stock_previous_close(self, symbol, unadjusted=True):
         pass
 
+    ## FOREX
+
     @get_request("/last/forex/{symbol}")
     def get_forex_last(self, symbol):
         pass
@@ -145,6 +151,8 @@ class Finage(object):
     @get_request("/convert/forex/{from_}/{to}/{amount}")
     def get_forex_convert(self, from_, to="USD", amount=1):
         pass
+
+    ## FUNDAMENTALS
 
     @get_request("/symbol-list/{market_type}")
     def get_symbol_list(self, market_type, page=1):
