@@ -14,6 +14,7 @@ logging.basicConfig(
 
 class Finage(object):
     api_root = "https://api.finage.co.uk"
+    timeout = 1
 
     def __init__(self, api_key=None):
         self.logger = logging.getLogger(__name__)
@@ -76,7 +77,7 @@ class Finage(object):
         self.session = requests.session()
         if headers is not None:
             self.session.headers.update(headers)
-        response = self.session.get(url, timeout=1)
+        response = self.session.get(url, timeout=self.timeout)
         self.logger.info(f"{response.status_code} GET {url}")
         return response
 
